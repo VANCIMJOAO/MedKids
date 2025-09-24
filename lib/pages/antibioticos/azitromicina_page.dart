@@ -16,16 +16,18 @@ class _AzitromicinaPageState extends State<AzitromicinaPage> {
   String? _doencaSelecionada;
   final List<String> _doencas = [
     "Faringoamigdalite",
+    "Piodermite",
     "Otite Média Aguda",
     "Rinossinusite",
-    "Pneumonia (PAC)",
+    "Pneumonia (Atípica)",
   ];
 
   final Map<String, double> _mgPorKgPorDia = {
     "Faringoamigdalite": 10.0,
+    "Piodermite": 10.0,
     "Otite Média Aguda": 10.0,
     "Rinossinusite": 10.0,
-    "Pneumonia (PAC)": 10.0,
+    "Pneumonia (Atípica)": 10,
   };
 
   @override

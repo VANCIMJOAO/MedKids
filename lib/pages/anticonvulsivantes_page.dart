@@ -5,31 +5,17 @@ import 'antibioticos/amoxicilinaclav_page.dart';
 import 'medicamento_desconhecido_page.dart';
 import 'antibioticos/amicacina_page.dart';
 import 'antibioticos/clarimicina_page.dart';
-import 'antibioticos/ceflacor_page.dart';
-import 'antibioticos/cefalexina_page.dart';
-import 'antibioticos/ceftriaxona_page.dart';
-import 'antibioticos/eritomicina_page.dart';
-import 'antibioticos/gentamicina_page.dart';
-import 'antibioticos/nitrofurantoina.dart';
-import 'antibioticos/penicilinacristalina_page.dart';
+import 'anticonvulsionantes/carbamazepina_page.dart';
 
 class AnticonvulsivantesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final medicamentos = [
-      'Amicacina IM/IV',
-      'Amoxicilina VO',
-      'Amoxicilina + Clavulanato VO',
-      'Azitromicina VO',
-      'Clarimicina VO',
-      'Ceflacor VO',
-      'Cefalexina VO',
-      'Ceftriaxona IM/IV',
-      'Eritromicina VO',
-      'Gentamicina IM/IV',
-      'Nitrofurantoína VO',
-      'Penicilina Cristalina IM/IV',
-      'Teste'
+      'Carbamazepina VO',
+      'Diazepam VO/IM/IV',
+      'Fenitoína VO/IV',
+      'Fenobarbital VO/IV',
+      'Valproato de Sódio VO',
       // ... Adicione os demais medicamentos aqui
     ];
 
@@ -44,30 +30,16 @@ class AnticonvulsivantesPage extends StatelessWidget {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) {
                   switch (medicamentos[index]) {
-                    case 'Amicacina IM/IV':
-                      return AmicacinaPage();
-                    case 'Amoxicilina VO':
+                    case 'Carbamazepina VO':
+                      return CarbamazepinaPage();
+                    case 'Diazepam VO/IM/IV':
                       return AmoxicilinaPage();
-                    case 'Amoxicilina + Clavulanato VO':
+                    case 'Fenitoína VO/IV':
                       return AmoxicilinaClavulanatoPage();
-                    case 'Azitromicina VO':
+                    case 'Fenobarbital VO/IV':
                       return AzitromicinaPage();
-                    case 'Clarimicina VO':
+                    case 'Valproato de Sódio VO':
                       return ClaritromicinaPage();
-                    case 'Ceflacor VO':
-                      return CeflacorPage();
-                    case 'Cefalexina VO':
-                      return CefalexinaPage();
-                    case 'Ceftriaxona IM/IV':
-                      return CeftriaxonaPage();
-                    case 'Eritromicina VO':
-                      return EritromicinaPage();
-                    case 'Gentamicina IM/IV':
-                      return GentamicinaPage();
-                    case 'Nitrofurantoína VO':
-                      return NitrofurantonaPage();
-                    case 'Penicilina Cristalina IM/IV':
-                      return PenicilinaPage();
                   // ... Adicione os outros casos aqui
                     default:
                       return MedicamentoDesconhecidoPage();
@@ -82,7 +54,7 @@ class AnticonvulsivantesPage extends StatelessWidget {
   }
 
   Widget _buildMedicamentoText(String medicamento) {
-    RegExp regex = RegExp(r' (IM/IV|VO)$');
+    RegExp regex = RegExp(r' (IM/IV|VO|VO/IM/IV|VO/IV)$');
     Match? match = regex.firstMatch(medicamento);
 
     if (match != null) {

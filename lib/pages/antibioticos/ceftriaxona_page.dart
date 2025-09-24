@@ -53,7 +53,7 @@ class _CeftriaxonaPageState extends State<CeftriaxonaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Calculadora de Amicacina")),
+      appBar: AppBar(title: Text("Calculadora de Ceftriaxona")),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(

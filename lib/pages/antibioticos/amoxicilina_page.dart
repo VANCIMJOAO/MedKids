@@ -54,17 +54,19 @@ class _AmoxicilinaPageState extends State<AmoxicilinaPage> {
       case 250:
         dose_por_tomada = dose_diaria / 3;
         diluicao_por_tomada = (dose_por_tomada / 250) * 5;
+        if (diluicao_por_tomada > 10) {
+          return 10;
+        }
         break;
       case 400:
         dose_por_tomada = dose_diaria / 2;
         diluicao_por_tomada = (dose_por_tomada / 400) * 5;
+        if (diluicao_por_tomada > 11) {
+          return 11;
+        }
         break;
       default:
         throw ArgumentError('Concentração não reconhecida: $concentracao');
-    }
-
-    if (diluicao_por_tomada > 10) {
-      return 10;
     }
 
     return diluicao_por_tomada;
@@ -79,7 +81,10 @@ class _AmoxicilinaPageState extends State<AmoxicilinaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Calculadora Amoxicilina")),
+      appBar: AppBar(
+        title: Text("Calculadora Amoxicilina"),
+        backgroundColor: Colors.red, // Exemplo de cor
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -97,12 +102,15 @@ class _AmoxicilinaPageState extends State<AmoxicilinaPage> {
                 items: _doencas.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value),
+                    child: Text(value, style: TextStyle(color: Colors.black54)), // Exemplo de cor de texto
                   );
                 }).toList(),
               ),
               SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red, // Exemplo de cor de botão
+                ),
                 child: Text("Retornar"),
                 onPressed: () {
                   recalcularDose();
@@ -112,59 +120,60 @@ class _AmoxicilinaPageState extends State<AmoxicilinaPage> {
               ),
               SizedBox(height: 20),
               if (_dose250 != null && _dose400 != null)
-                Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Icon(Icons.medical_services, color: Colors
-                              .blue, size: 40),
-                          title: Text('Para 250 mg/5 ml:'),
-                          subtitle: Text('A criança deve tomar ${_dose250!
-                              .toStringAsFixed(2)} ml a cada 8 horas.'),
-                        ),
-                        Divider(),
-                        ListTile(
-                          leading: Icon(Icons.medical_services, color: Colors
-                              .red, size: 40),
-                          title: Text('Para 400 mg/5 ml:'),
-                          subtitle: Text('A criança deve tomar ${_dose400!
-                              .toStringAsFixed(2)} ml a cada 12 horas.'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                buildDoseCard(),
               SizedBox(height: 20),
-              // Card de orientações
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
+              buildOrientacoesCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildDoseCard() {
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.medical_services, color: Colors.blue, size: 40),
+              title: Text('Para 250 mg/5 ml:'),
+              subtitle: Text('A criança deve tomar ${_dose250!.toStringAsFixed(2)} ml a cada 8 horas.'),
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.medical_services, color: Colors.red, size: 40),
+              title: Text('Para 400 mg/5 ml:'),
+              subtitle: Text('A criança deve tomar ${_dose400!.toStringAsFixed(2)} ml a cada 12 horas.'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildOrientacoesCard() {
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: orientacoes.map((orientacao) =>
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ListTile(
+                  leading: Icon(Icons.info_outline, color: Colors.red, size: 40),
+                  title: Text(orientacao, style: TextStyle(fontSize: 16)),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: orientacoes.map((orientacao) =>
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: ListTile(
-                            leading: Icon(
-                                Icons.info_outline, color: Colors.green,
-                                size: 40),
-                            title: Text(
-                                orientacao, style: TextStyle(fontSize: 16)),
-                          ),
-                        )).toList(),
-                  ),
-                ),
-              ),
-            ],          ),
+              )).toList(),
         ),
       ),
     );

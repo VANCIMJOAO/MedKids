@@ -10,6 +10,7 @@ class CefalexinaPage extends StatefulWidget {
 
 class _CefalexinaPageState extends State<CefalexinaPage> {
   double? _dose250;
+  double? _dose500; // Adicione esta variável
   double? peso;
 
   String? _doencaSelecionada;
@@ -29,13 +30,12 @@ class _CefalexinaPageState extends State<CefalexinaPage> {
     "Pneumonia (PAC)": 100.0,
     "ITU": 50.0,
     "ITU (Profilaxia)": 13.0,
-
   };
 
   @override
   void initState() {
     super.initState();
-    _doencaSelecionada = "Piodermite"; // Set the initial value
+    _doencaSelecionada = "Piodermite"; // Defina o valor inicial
     recalcularDose();
   }
 
@@ -44,27 +44,36 @@ class _CefalexinaPageState extends State<CefalexinaPage> {
     if (peso != null) {
       setState(() {
         _dose250 = calcularDose(peso!, 250);
+        _dose500 = calcularDose(peso!, 500);
       });
     }
   }
 
   double calcularDose(double peso, int concentracao) {
-    double dose_diaria = (_mgPorKgPorDia[_doencaSelecionada] ?? 50.0) * peso; // Dose total por dia
-    double dose_por_tomada = dose_diaria / 2; // Dividir por 2 pois é a cada 12/12 horas.
-    double diluicao_por_tomada;
+    double doseDiaria = (_mgPorKgPorDia[_doencaSelecionada] ?? 50.0) * peso; // Dose total por dia
+    double dosePorTomada = doseDiaria / 2; // Dividir por 2 pois é a cada 12/12 horas
+    double diluicaoPorTomada;
 
     switch (concentracao) {
       case 250:
-        diluicao_por_tomada = (dose_por_tomada * 5) / 500; // Convertendo para mL.
-        if (diluicao_por_tomada > 10.0) {
-          return 10.0; // Se necessário, limite o valor.
+        diluicaoPorTomada = (dosePorTomada * 5) / 500; // Convertendo para mL
+        if (diluicaoPorTomada > 10.0) {
+          return 10.0; // Se necessário, limite o valor
+        }
+        break;
+      case 500:
+      // Adicione a condição para a dosagem de 500mg
+        if (peso >= 40 && (_doencaSelecionada == "Otite Média Aguda" || _doencaSelecionada == "Pneumonia (PAC)")) {
+          return 1.0; // 1 comprimido para peso >= 40 e doenças específicas
+        } else {
+          return 0.0; // 0 comprimidos para outras condições
         }
         break;
       default:
         throw ArgumentError('Concentração não reconhecida: $concentracao');
     }
 
-    return diluicao_por_tomada;
+    return diluicaoPorTomada;
   }
 
   List<String> orientacoes = [
@@ -122,33 +131,18 @@ class _CefalexinaPageState extends State<CefalexinaPage> {
                         subtitle: Text('A criança deve tomar ${_dose250?.toStringAsFixed(2) ?? '0.00'} ml, em intervalos de 6/6 horas, durante 7 dias, por via oral.'),
                       ),
                       Divider(),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
                       ListTile(
                         leading: Icon(Icons.medical_services, color: Colors.blue, size: 40),
                         title: Text('Para 500 mg:'),
-                        subtitle: peso != null && peso! >= 40
-                            ? Text('1 comprimido, em intervalos de 6/6 horas, durante 7 dias, por via oral.')
-                            : Text('Esta apresentação não é uma boa indicação pelo sub-dose ou super-dose.', style: TextStyle(color: Colors.red)),
+                        subtitle: Text(_doencaSelecionada == "Otite Média Aguda" || _doencaSelecionada == "Pneumonia (PAC)"
+                            ? '1 comprimido, em intervalos de 6/6 horas, durante 7 dias, por via oral.'
+                            : 'Esta apresentação não é uma boa indicação pelo sub-dose ou super-dose.', style: TextStyle(color: Colors.red)),
                       ),
                       Divider(),
                     ],
                   ),
                 ),
               ),
-
               SizedBox(height: 20),
               Card(
                 elevation: 5,

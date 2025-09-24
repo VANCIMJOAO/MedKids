@@ -41,7 +41,7 @@ class _NitrofurantonaPageState extends State<NitrofurantonaPage> {
 
   double calcularDose(double peso, int concentracao) {
     double dose_diaria = (_mgPorKgPorDia[_doencaSelecionada] ?? 6.0) * peso;
-    int divisor = _doencaSelecionada == "ITU (Profilaxia)" ? 1 : 2; // Se ITU (Profilaxia), divide por 1 (uma vez ao dia), se ITU, divide por 2 (duas vezes ao dia).
+    int divisor = _doencaSelecionada == "ITU (Profilaxia)" ? 1 : 4; // Se ITU (Profilaxia), divide por 1 (uma vez ao dia), se ITU, divide por 2 (duas vezes ao dia).
     double dose_por_tomada = dose_diaria / divisor;
     double diluicao_por_tomada;
 

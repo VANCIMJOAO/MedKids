@@ -148,7 +148,7 @@ class _AmicacinaPageState extends State<AmicacinaPage> {
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: ListTile(
                               leading: Icon(
-                                  Icons.info_outline, color: Colors.green,
+                                  Icons.info_outline, color: Colors.red,
                                   size: 40),
                               title: Text(
                                   orientacao, style: TextStyle(fontSize: 16)),

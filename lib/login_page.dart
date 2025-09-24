@@ -1,9 +1,46 @@
 import 'package:flutter/material.dart';
-import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_page.dart';
-import 'pages/peso_paciente_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'auth_service.dart';
+// Importei o 'flutter_screenutil' para você, mas é necessário adicionar no seu pubspec.yaml
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'pages/peso_paciente_page.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: AuthenticationWrapper(),
+    );
+  }
+}
+
+class AuthenticationWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.active) {
+          User? user = snapshot.data;
+          if (user == null) {
+            return LoginPage();
+          } else {
+            return PesoPacientePage();
+          }
+        } else {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
 
 class LoginPage extends StatefulWidget {
   @override
@@ -17,14 +54,13 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   late TabController _tabController;
-
+  final _formKey = GlobalKey<FormState>();
   String buttonText = "Login";
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-
     _tabController.addListener(() {
       setState(() {
         buttonText = _tabController.index == 0 ? "Login" : "Cadastrar";
@@ -41,6 +77,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Image.asset(
@@ -51,7 +88,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           ),
           Center(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -60,17 +97,26 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     width: 200,
                     height: 200,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   DefaultTabController(
                     length: 2,
                     child: Column(
                       children: [
                         TabBar(
                           controller: _tabController,
-                          labelColor: Colors.black, // Cor do texto da aba selecionada
-                          unselectedLabelColor: Colors.black,
-                          labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                          tabs: [
+                          labelColor: Theme
+                              .of(context)
+                              .colorScheme
+                              .onSurface,
+                          unselectedLabelColor: Theme
+                              .of(context)
+                              .colorScheme
+                              .onSurface,
+                          labelStyle: Theme
+                              .of(context)
+                              .textTheme
+                              .button,
+                          tabs: const [
                             Tab(text: 'Entrar'),
                             Tab(text: 'Cadastro'),
                           ],
@@ -89,162 +135,145 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   }
 
   Widget _buildTabContent() {
-    return Container(
-      padding: EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Column(
-        children: [
-          _tabController.index == 1
-              ? Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Nome',
-                  labelStyle: TextStyle(color: Colors.black),
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: InputBorder.none,
-                ),
-                style: TextStyle(color: Colors.black),
+    return Form(
+      key: _formKey,
+      child: Container(
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Column(
+          children: [
+            if (_tabController.index == 1)
+              Column(
+                children: [
+                  CustomTextField(controller: _nameController, label: 'Nome'),
+                  const SizedBox(height: 10),
+                ],
               ),
-              SizedBox(height: 10),
-            ],
-          )
-              : SizedBox(),
-          TextFormField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              labelText: 'Email',
-              labelStyle: TextStyle(color: Colors.black),
-              fillColor: Colors.white,
-              filled: true,
-              border: InputBorder.none,
-            ),
-            style: TextStyle(color: Colors.black),
-          ),
-          SizedBox(height: 10),
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              labelStyle: TextStyle(color: Colors.black),
-              fillColor: Colors.white,
-              filled: true,
-              border: InputBorder.none,
-            ),
-            style: TextStyle(color: Colors.black),
-            obscureText: true,
-          ),
-          _tabController.index == 1
-              ? Column(
-            children: [
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirme a Senha',
-                  labelStyle: TextStyle(color: Colors.black),
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: InputBorder.none,
-                ),
-                style: TextStyle(color: Colors.black),
-                obscureText: true,
+            CustomTextField(controller: _emailController, label: 'Email'),
+            const SizedBox(height: 10),
+            CustomTextField(controller: _passwordController,
+                label: 'Password',
+                obscureText: true),
+            if (_tabController.index == 1)
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  CustomTextField(controller: _confirmPasswordController,
+                      label: 'Confirme a Senha',
+                      obscureText: true),
+                ],
               ),
-            ],
-          )
-              : SizedBox(),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              if (_tabController.index == 0) {
-                // Lógica de Login
-                String email = _emailController.text.trim();
-                String password = _passwordController.text.trim();
-
-                User? user = await _authService.signIn(email, password);
-
-                if (user != null) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PesoPacientePage(),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Falha no login. Verifique seus dados.'),
-                    ),
-                  );
-                }
-              } else if (_tabController.index == 1) {
-                // Lógica de Cadastro
-                String name = _nameController.text.trim();
-                String email = _emailController.text.trim();
-                String password = _passwordController.text.trim();
-                String confirmPassword = _confirmPasswordController.text.trim();
-
-                if (password == confirmPassword) {
-                  User? user = await _authService.signUp(name, email, password);
-
-                  if (user != null) {
-                    await _writeUserDataToDatabase(user.uid, name,
-                        email); // Gravar dados do usuário no Firebase Database
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PesoPacientePage(),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Falha no cadastro. Verifique seus dados.'),
-                      ),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('As senhas não coincidem.'),
-                    ),
-                  );
-                }
-              }
-            },
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _onSubmit,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Theme
+                    .of(context)
+                    .colorScheme
+                    .primary),
+              ),
+              child: Text(
+                buttonText,
+                style: TextStyle(color: Theme
+                    .of(context)
+                    .colorScheme
+                    .onPrimary),
+              ),
             ),
-            child: Text(
-              buttonText,
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> _writeUserDataToDatabase(String userId, String name,
-      String email) async {
-    try {
-      CollectionReference users = FirebaseFirestore.instance.collection(
-          'users');
+  void _onSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      await users.doc(userId).set({
-        'name': name,
-        'email': email,
-        // Outros campos de dados, se necessário
-      });
-    } catch (e) {
-      print(e.toString());
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+
+    // Para a tab de login.
+    if (_tabController.index == 0) {
+      try {
+        await _authService.signIn(email, password);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PesoPacientePage()));
+        // Se o login for bem-sucedido, você será redirecionado pelo AuthenticationWrapper.
+      } on FirebaseAuthException catch (e) {
+        // Trate os erros de login aqui.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro de Login: ${e.message}')),
+        );
+      }
     }
+    // Para a tab de cadastro.
+    else {
+      if (password != _confirmPasswordController.text.trim()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('As senhas não coincidem.')),
+        );
+        return;
+      }
+
+      if (name.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Nome não pode ser vazio.')),
+        );
+        return;
+      }
+
+      try {
+        await _authService.signUp(name, email, password);
+        // Se o cadastro for bem-sucedido, você será redirecionado pelo AuthenticationWrapper.
+      } on FirebaseAuthException catch (e) {
+        // Trate os erros de cadastro aqui.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro de Cadastro: ${e.message}')),
+        );
+      }
+    }
+  }
+}
+
+class CustomTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final bool obscureText;
+
+  const CustomTextField({
+    required this.controller,
+    required this.label,
+    this.obscureText = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: Theme.of(context).textTheme.bodyText1,
+        fillColor: Colors.white,
+        filled: true,
+        border: InputBorder.none,
+      ),
+      style: Theme.of(context).textTheme.bodyText2,
+      obscureText: obscureText,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '$label não pode ser vazio';
+        }
+        if (label == 'Email' && !RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+          return 'Email inválido';
+        }
+        if (label.contains('Password') && value.length < 6) {
+          return 'Password deve ter pelo menos 6 caracteres';
+        }
+        return null;
+      },
+    );
   }
 }
